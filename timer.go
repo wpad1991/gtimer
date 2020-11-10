@@ -35,7 +35,6 @@ func (t *timer) start() {
 			mutex.Lock()
 			ntime := time.Now()
 			size := nodelist.Size()
-			println("size : ", size)
 
 			if size > 0 {
 
@@ -49,26 +48,12 @@ func (t *timer) start() {
 					dtime := ntime.Sub(*node.value.setTime)
 					if dtime.Milliseconds() >= 0 {
 
-						println("----scan----")
-						println("cur : ", node.idx)
-						if node.next != nil {
-							println("next : ", node.next.idx)
-
-							if node.next.prev != nil {
-								println("next.prev : ", node.next.prev.idx)
-							}
-
-						}
-
-						if node.prev != nil {
-							println("prev : ", node.prev.idx)
-						}
-
 						nodelist.RemoveNode(node)
 						if dtime.Milliseconds() > ntime.Sub(pretime).Milliseconds() {
 							continue
 						}
 
+						println(checkTime.Format("2006-01-02 15:04:05"), " : ", node.value.setTime.Format("2006-01-02 15:04:05"))
 						node.value.AlertFunc()
 
 						if node.value.cycleType != None {
@@ -104,8 +89,8 @@ func (t *timer) Stop() {
 	t.isStop = false
 }
 
-func (t *timer) SetAlertTime(stime *time.Time, f func()) {
-	node := newAlertNode(stime, f)
+func (t *timer) SetAlertTime(stime *time.Time, f func(), cycle Cycle) {
+	node := newAlertNode(stime, f, cycle)
 	t.mutex.Lock()
 	t.alertList.AddNode(node)
 	t.mutex.Unlock()

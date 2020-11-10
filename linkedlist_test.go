@@ -11,23 +11,23 @@ func TestList(t *testing.T) {
 
 	list.AddNode(newAlertNode(&time.Time{}, func() {
 		println("1")
-	}))
+	}, None))
 
 	list.AddNode(newAlertNode(&time.Time{}, func() {
 		println("2")
-	}))
+	}, None))
 
 	list.AddNode(newAlertNode(&time.Time{}, func() {
 		println("3")
-	}))
+	}, None))
 
 	list.AddNode(newAlertNode(&time.Time{}, func() {
 		println("4")
-	}))
+	}, None))
 
 	list.AddNode(newAlertNode(&time.Time{}, func() {
 		println("5")
-	}))
+	}, None))
 
 	println("-> ", list.Size())
 	list.FindIndex(0).value.AlertFunc()

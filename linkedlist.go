@@ -1,5 +1,9 @@
 package gtimer
 
+import (
+	"strconv"
+)
+
 type linkedlist struct {
 	head *linknode
 	tail *linknode
@@ -12,18 +16,23 @@ type linknode struct {
 	value *alertNode
 }
 
+var nodekey = 0
+
 func (l *linkedlist) AddNode(value *alertNode) {
+
+	nodekey++
 	if l.head == nil {
+
 		node := linknode{}
 		node.value = value
+		node.idx = nodekey
 		l.head = &node
 		l.tail = &node
 	} else {
 		tail := l.tail
-
 		node := linknode{}
 		node.value = value
-		node.idx = l.tail.idx + 1
+		node.idx = nodekey
 		node.prev = l.tail
 
 		l.tail = &node
@@ -33,6 +42,10 @@ func (l *linkedlist) AddNode(value *alertNode) {
 }
 
 func (l *linkedlist) AddNodeIndex(value *alertNode, idx int) {
+	if l.CheckIndex(idx) {
+		panic("AddNode already exist index : " + strconv.Itoa(idx))
+	}
+
 	if l.head == nil {
 		node := linknode{}
 		node.idx = idx
@@ -49,12 +62,26 @@ func (l *linkedlist) AddNodeIndex(value *alertNode, idx int) {
 
 		l.tail = &node
 		tail.next = &node
+	}
+}
 
-		if node.prev == nil {
-			println("is NILL?")
+func (l *linkedlist) CheckIndex(index int) bool {
+
+	node := l.head
+
+	for {
+		if node == nil {
+			break
 		}
 
+		if node.idx == index {
+			return true
+		}
+
+		node = node.next
 	}
+
+	return false
 }
 
 func (l *linkedlist) RemoveIndex(index int) *linknode {
@@ -72,6 +99,33 @@ func (l *linkedlist) RemoveIndex(index int) *linknode {
 }
 
 func (l *linkedlist) RemoveNode(node *linknode) {
+
+	if l.head == node {
+		nextnode := node.next
+
+		if nextnode != nil {
+			nextnode.prev = nil
+		}
+
+		l.head = nextnode
+
+	} else if l.tail == node {
+		prenode := node.prev
+		l.tail = prenode
+
+		prenode.next = nil
+		node.prev = nil
+	} else {
+		prenode := node.prev
+		nexnode := node.next
+
+		prenode.next = nexnode
+		nexnode.prev = prenode
+
+		node.prev = nil
+		node.next = nil
+	}
+
 	if node.prev != nil {
 		node.prev.next = node.next
 	}

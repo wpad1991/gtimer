@@ -20,9 +20,9 @@ type alertNode struct {
 	alertFunc func()
 }
 
-func newAlertNode(stime *time.Time, f func()) *alertNode {
+func newAlertNode(stime *time.Time, f func(), cycle Cycle) *alertNode {
 	node := alertNode{}
-	node.cycleType = None
+	node.cycleType = cycle
 	node.setTime = stime
 	node.alertFunc = f
 	return &node

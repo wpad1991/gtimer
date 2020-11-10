@@ -25,15 +25,18 @@ func TestExec(t *testing.T) {
 	qwe[9] = func() { println(9) }
 
 	for i := 0; i < 10; i++ {
-		d := ntime.Add(time.Duration(10000 * (i + 1)))
+		d := ntime.Add(time.Duration(time.Millisecond * (1000 * time.Duration(i+1))))
+		qwe := d
+		println("SetTime : ", qwe.Format("2006-01-02 15:04:05"))
 		qq := i
 		f := func() {
 			println(qq)
 		}
 
-		timer.SetAlertTime(&d, f)
+		timer.SetAlertTime(&qwe, f, None)
 	}
 
+	//timer.alertList.ScanFunc()
 	time.Sleep(time.Millisecond * 600000)
 }
 
@@ -71,7 +74,7 @@ func TestNodes(t *testing.T) {
 		}
 		println("-----------111111")
 		println(f)
-		n := newAlertNode(&d, f)
+		n := newAlertNode(&d, f, None)
 		println(n.AlertFunc)
 		println(f)
 		alertList.AddNodeIndex(n, i)
