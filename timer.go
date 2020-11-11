@@ -30,8 +30,6 @@ func (t *timer) start() {
 		pretime := time.Time{}
 
 		for !*stop {
-
-			checkTime := time.Now()
 			mutex.Lock()
 			size := nodelist.Size()
 			ntime := time.Now()
