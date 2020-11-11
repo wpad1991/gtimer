@@ -22,7 +22,6 @@ func (l *linkedlist) AddNode(value *alertNode) {
 
 	nodekey++
 	if l.head == nil {
-
 		node := linknode{}
 		node.value = value
 		node.idx = nodekey
@@ -37,7 +36,6 @@ func (l *linkedlist) AddNode(value *alertNode) {
 
 		l.tail = &node
 		tail.next = l.tail
-
 	}
 }
 
@@ -99,7 +97,6 @@ func (l *linkedlist) RemoveIndex(index int) *linknode {
 }
 
 func (l *linkedlist) RemoveNode(node *linknode) {
-
 	if l.head == node {
 		nextnode := node.next
 
@@ -125,14 +122,6 @@ func (l *linkedlist) RemoveNode(node *linknode) {
 		node.prev = nil
 		node.next = nil
 	}
-
-	if node.prev != nil {
-		node.prev.next = node.next
-	}
-	if node.next != nil {
-		node.next.prev = node.prev
-	}
-
 }
 
 func (l *linkedlist) FindIndex(index int) *linknode {

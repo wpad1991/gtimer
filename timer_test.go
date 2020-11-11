@@ -5,6 +5,17 @@ import (
 	"time"
 )
 
+func TestGetTime(t *testing.T) {
+
+	tn := time.Now()
+
+	t1 := time.Duration(tn.Second()) * time.Millisecond
+
+	println(tn.Second())
+	println(t1)
+
+}
+
 func TestExec(t *testing.T) {
 
 	timer := NewTimer()
@@ -13,27 +24,32 @@ func TestExec(t *testing.T) {
 
 	qwe := make([]func(), 10)
 
-	qwe[0] = func() { println(0) }
-	qwe[1] = func() { println(1) }
-	qwe[2] = func() { println(2) }
-	qwe[3] = func() { println(3) }
-	qwe[4] = func() { println(4) }
-	qwe[5] = func() { println(5) }
-	qwe[6] = func() { println(6) }
-	qwe[7] = func() { println(7) }
-	qwe[8] = func() { println(8) }
-	qwe[9] = func() { println(9) }
+	qwe[0] = func() { println("value : ", 0) }
+	qwe[1] = func() { println("value : ", 1) }
+	qwe[2] = func() { println("value : ", 2) }
+	qwe[3] = func() { println("value : ", 3) }
+	qwe[4] = func() { println("value : ", 4) }
+	qwe[5] = func() { println("value : ", 5) }
+	qwe[6] = func() { println("value : ", 6) }
+	qwe[7] = func() { println("value : ", 7) }
+	qwe[8] = func() { println("value : ", 8) }
+	qwe[9] = func() { println("value : ", 9) }
 
+	ddt := ntime.Add(time.Duration(time.Millisecond * (1000 * time.Duration(2))))
+
+	timer.SetAlertTime(&ddt, Daily, 0, func() {
+		println("value : ", 10)
+	})
 	for i := 0; i < 10; i++ {
-		d := ntime.Add(time.Duration(time.Millisecond * (1000 * time.Duration(i+1))))
+		d := ntime.Add(time.Duration(time.Millisecond * (1000 * time.Duration(i/2+1))))
 		qwe := d
 		println("SetTime : ", qwe.Format("2006-01-02 15:04:05"))
 		qq := i
 		f := func() {
-			println(qq)
+			println("value : ", qq)
 		}
 
-		timer.SetAlertTime(&qwe, f, None)
+		timer.SetAlertTime(&qwe, None, 0, f)
 	}
 
 	//timer.alertList.ScanFunc()
@@ -74,7 +90,7 @@ func TestNodes(t *testing.T) {
 		}
 		println("-----------111111")
 		println(f)
-		n := newAlertNode(&d, f, None)
+		n := newAlertNode(&d, None, 0, f)
 		println(n.AlertFunc)
 		println(f)
 		alertList.AddNodeIndex(n, i)

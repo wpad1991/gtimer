@@ -33,9 +33,8 @@ func (t *timer) start() {
 
 			checkTime := time.Now()
 			mutex.Lock()
-			ntime := time.Now()
 			size := nodelist.Size()
-
+			ntime := time.Now()
 			if size > 0 {
 
 				node := nodelist.head
@@ -45,40 +44,52 @@ func (t *timer) start() {
 						break
 					}
 
-					dtime := ntime.Sub(*node.value.setTime)
-					if dtime.Milliseconds() >= 0 {
+					nextnode := node.next
 
-						nodelist.RemoveNode(node)
-						if dtime.Milliseconds() > ntime.Sub(pretime).Milliseconds() {
-							continue
+					if node.value.cycleType == None {
+						dtime := ntime.Sub(*node.value.setTime)
+						if dtime >= 0 {
+							nodelist.RemoveNode(node)
+							if dtime.Milliseconds() > ntime.Sub(pretime).Milliseconds() {
+								node = node.next
+								continue
+							}
+							node.value.AlertFunc()
 						}
-
-						println(checkTime.Format("2006-01-02 15:04:05"), " : ", node.value.setTime.Format("2006-01-02 15:04:05"))
-						node.value.AlertFunc()
-
-						if node.value.cycleType != None {
+					} else {
+						dtime := GetDayTimeMilisecond(ntime) - GetDayTimeMilisecond(*node.value.setTime)
+						if int64(dtime) < ntime.Sub(pretime).Milliseconds() && dtime > 0 {
 							switch node.value.cycleType {
 							case Daily:
-								(*node.value.setTime) = (*node.value.setTime).AddDate(0, 0, 1)
+								node.value.AlertFunc()
 							case Weekly:
-								(*node.value.setTime) = (*node.value.setTime).AddDate(0, 0, 7)
+								ExecWeekFunc(node.value.weekCycleType, ntime, node.value.AlertFunc)
 							case Monthly:
-								(*node.value.setTime) = (*node.value.setTime).AddDate(0, 1, 0)
+								if ntime.Day() == node.value.setTime.Day() {
+									if ntime.Month() != node.value.setTime.Month() {
+										node.value.AlertFunc()
+									}
+								}
 							case Yearly:
-								(*node.value.setTime) = (*node.value.setTime).AddDate(1, 0, 0)
+								if ntime.Day() == node.value.setTime.Day() {
+									if ntime.Month() == node.value.setTime.Month() {
+										if ntime.Year() == node.value.setTime.Year() {
+											node.value.AlertFunc()
+										}
+									}
+								}
 							}
-							nodelist.AddNode(node.value)
 						}
 					}
-
-					node = node.next
+					node = nextnode
 				}
 			}
 
 			mutex.Unlock()
-			dd := time.Now().Sub(checkTime)
-			println("Time : ", dd.Milliseconds(), ", cnt : ", size)
+			//dd := time.Now().Sub(checkTime)
+			//println("Time : ", dd.Milliseconds(), ", cnt : ", size)
 			pretime = ntime
+
 			time.Sleep(time.Millisecond * time.Duration(*delay))
 		}
 
@@ -89,9 +100,70 @@ func (t *timer) Stop() {
 	t.isStop = false
 }
 
-func (t *timer) SetAlertTime(stime *time.Time, f func(), cycle Cycle) {
-	node := newAlertNode(stime, f, cycle)
+func (t *timer) SetAlertTime(stime *time.Time, cycle Cycle, weekcycle WeekCycle, f func()) {
+	node := newAlertNode(stime, cycle, weekcycle, f)
 	t.mutex.Lock()
 	t.alertList.AddNode(node)
 	t.mutex.Unlock()
+}
+
+func GetDayTimeMilisecond(t time.Time) int {
+
+	totalmili := 0
+
+	totalmili += t.Hour() * 1000 * 60 * 60
+	totalmili += t.Minute() * 1000 * 60
+	totalmili += t.Second() * 1000
+	totalmili += t.Nanosecond() / 1000000
+
+	return totalmili
+}
+
+func ExecWeekFunc(wc WeekCycle, dt time.Time, f func()) {
+
+	if wc&WeekMonday != 0 {
+		if dt.Weekday() == time.Monday {
+			f()
+		}
+	}
+	if wc&WeekTuesday != 0 {
+		if dt.Weekday() == time.Tuesday {
+			f()
+		}
+	}
+	if wc&WeekWednesday != 0 {
+		if dt.Weekday() == time.Wednesday {
+			f()
+		}
+	}
+	if wc&WeekThursday != 0 {
+		if dt.Weekday() == time.Thursday {
+			f()
+		}
+	}
+	if wc&WeekFriday != 0 {
+		if dt.Weekday() == time.Friday {
+			f()
+		}
+	}
+	if wc&WeekSaturday != 0 {
+		if dt.Weekday() == time.Saturday {
+			f()
+		}
+	}
+	if wc&WeekSunday != 0 {
+		if dt.Weekday() == time.Sunday {
+			f()
+		}
+	}
+	if wc&WeekWeekday != 0 {
+		if dt.Weekday() != time.Saturday && dt.Weekday() != time.Sunday {
+			f()
+		}
+	}
+	if wc&WeekWeekend != 0 {
+		if dt.Weekday() == time.Saturday || dt.Weekday() == time.Sunday {
+			f()
+		}
+	}
 }
